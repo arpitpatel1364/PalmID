@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PalmID — Gesture Biometric Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css"/>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="scanlines"></div>
+
+<!-- ── BOOT ── -->
+<div id="boot-screen">
+  <div class="boot-inner">
+    <div class="boot-logo-wrap">
+      <!-- PalmID Logo SVG -->
+      <svg class="boot-logo-svg" width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="42" stroke="#7B61FF" stroke-width="1" stroke-dasharray="6 4" class="orbit-ring"/>
+        <circle cx="45" cy="45" r="32" fill="url(#grd1)" opacity="0.15"/>
+        <!-- Palm lines -->
+        <path d="M45 62 L45 48 M45 48 L38 34 M45 48 L52 34 M45 48 L45 30" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" class="palm-draw"/>
+        <!-- Finger tips -->
+        <circle cx="38" cy="31" r="3" fill="#7B61FF" class="tip-dot"/>
+        <circle cx="52" cy="31" r="3" fill="#A78BFA" class="tip-dot"/>
+        <circle cx="45" cy="27" r="3" fill="#C4B5FD" class="tip-dot"/>
+        <circle cx="45" cy="62" r="5" fill="#7B61FF" opacity="0.6"/>
+        <!-- Outer hex -->
+        <polygon points="45,3 82,24 82,66 45,87 8,66 8,24" stroke="#7B61FF" stroke-width="1" fill="none" stroke-dasharray="4 8" class="hex-outer"/>
+        <defs>
+          <radialGradient id="grd1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7B61FF"/>
+            <stop offset="100%" stop-color="#7B61FF" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="boot-brand">Palm<span>ID</span></div>
+    <div class="boot-tagline">Gesture Biometric Authentication System</div>
+    <div class="boot-bar-wrap"><div id="boot-bar"></div><div class="boot-bar-glow"></div></div>
+    <div id="boot-msg" class="boot-msg">INITIALIZING...</div>
+    <div class="boot-ver">v2.0.0 · PROTOTYPE</div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="main-app" class="hidden">
+
+  <!-- HEADER -->
+  <header id="app-header">
+    <div class="header-left">
+      <!-- Inline logo -->
+      <svg class="header-logo-svg" width="36" height="36" viewBox="0 0 90 90" fill="none">
+        <circle cx="45" cy="45" r="42" stroke="#7B61FF" stroke-width="1.5" stroke-dasharray="5 5" class="orbit-ring-sm"/>
+        <path d="M45 60 L45 46 M45 46 L39 34 M45 46 L51 34 M45 46 L45 28" stroke="#7B61FF" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="39" cy="31" r="3" fill="#7B61FF"/>
+        <circle cx="51" cy="31" r="3" fill="#A78BFA"/>
+        <circle cx="45" cy="25" r="3" fill="#C4B5FD"/>
+        <circle cx="45" cy="60" r="4.5" fill="#7B61FF" opacity="0.7"/>
+      </svg>
+      <div class="brand-text">Palm<span>ID</span></div>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="auth">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>AUTH
+      </button>
+      <button class="tab-btn" data-tab="enroll">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M6 14a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5"/></svg>ENROLL
+      </button>
+      <button class="tab-btn" data-tab="users">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>USERS
+      </button>
+      <button class="tab-btn" data-tab="log">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>AUDIT
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>SETTINGS
+      </button>
+    </nav>
+    <div class="header-right">
+      <div id="active-user-pill" class="user-pill hidden">
+        <span class="user-avatar" id="active-avatar">?</span>
+        <span id="active-username">—</span>
+      </div>
+      <div class="sys-pill" id="sys-pill"><span class="sys-dot"></span><span id="sys-label">OFFLINE</span></div>
+      <button class="icon-btn" id="btn-theme" title="Toggle theme">
+        <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <div class="clock" id="clock"></div>
+    </div>
+  </header>
+
+  <!-- ══ AUTH TAB ══ -->
+  <section id="tab-auth" class="tab-panel active">
+    <!-- Lockout banner -->
+    <div id="lockout-banner" class="lockout-banner hidden">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span id="lockout-msg">SYSTEM LOCKED — Too many failed attempts</span>
+      <span id="lockout-timer" class="lockout-timer"></span>
+    </div>
+
+    <div class="two-col">
+      <!-- Camera -->
+      <div class="cam-col">
+        <div class="cam-frame" id="cam-frame">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <!-- Grid overlay -->
+          <div class="cam-grid"></div>
+          <video id="video" playsinline autoplay muted></video>
+          <canvas id="canvas"></canvas>
+          <div class="gesture-flash" id="gesture-flash"></div>
+          <div class="cam-overlay" id="cam-overlay">
+            <div class="cam-icon-wrap">
+              <svg width="48" height="48" viewBox="0 0 90 90" fill="none">
+                <path d="M45 62 L45 48 M45 48 L38 34 M45 48 L52 34 M45 48 L45 30" stroke="#7B61FF" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                <circle cx="38" cy="31" r="3" fill="#7B61FF" opacity="0.6"/>
+                <circle cx="52" cy="31" r="3" fill="#7B61FF" opacity="0.6"/>
+                <circle cx="45" cy="27" r="3" fill="#7B61FF" opacity="0.6"/>
+                <circle cx="45" cy="62" r="5" fill="#7B61FF" opacity="0.4"/>
+              </svg>
+            </div>
+            <div class="cam-overlay-text">CAMERA OFFLINE</div>
+            <div class="cam-overlay-sub">Click Start Camera to begin</div>
+          </div>
+          <!-- HUD -->
+          <div class="cam-hud" id="cam-hud">
+            <div class="hud-item"><span class="hud-k">FPS</span><span class="hud-v" id="hud-fps">—</span></div>
+            <div class="hud-item"><span class="hud-k">LM</span><span class="hud-v">21</span></div>
+            <div class="hud-item"><span class="hud-k">MODE</span><span class="hud-v">LIVE</span></div>
+          </div>
+          <!-- Hold arc -->
+          <svg id="hold-arc-svg" class="hold-arc-svg" viewBox="0 0 80 80" style="display:none">
+            <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(123,97,255,0.2)" stroke-width="4"/>
+            <circle id="hold-arc-circle" cx="40" cy="40" r="30" fill="none" stroke="#7B61FF" stroke-width="4"
+              stroke-dasharray="188.5" stroke-dashoffset="188.5" stroke-linecap="round"
+              transform="rotate(-90 40 40)"/>
+          </svg>
+        </div>
+
+        <!-- Gesture bar -->
+        <div class="gesture-bar">
+          <div class="gb-left">
+            <span class="gb-icon" id="cur-gesture-icon">—</span>
+            <div>
+              <div class="gb-name" id="cur-gesture-name">No gesture</div>
+              <div class="gb-sub">Hold 1.5s to register</div>
+            </div>
+          </div>
+          <div class="gb-right">
+            <div class="conf-ring-wrap">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(123,97,255,0.15)" stroke-width="3"/>
+                <circle id="conf-arc" cx="20" cy="20" r="16" fill="none" stroke="#7B61FF" stroke-width="3"
+                  stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round"
+                  transform="rotate(-90 20 20)" style="transition:stroke-dashoffset .15s"/>
+              </svg>
+              <span id="conf-pct" class="conf-pct-text">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cam-controls">
+          <button class="primary-btn" id="btn-cam">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            START CAMERA
+          </button>
+          <button class="ghost-btn" id="btn-reset">RESET</button>
+        </div>
+      </div>
+
+      <!-- Auth panel -->
+      <div class="auth-col">
+        <!-- User selector -->
+        <div class="field-group">
+          <label class="field-label">AUTHENTICATE AS</label>
+          <select id="user-select" class="select-field">
+            <option value="">— Select user —</option>
+          </select>
+        </div>
+
+        <!-- Pattern (masked) -->
+        <div class="field-group">
+          <div class="field-label-row">
+            <label class="field-label">SECRET PATTERN</label>
+            <button class="peek-btn" id="btn-peek" title="Peek at pattern">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>PEEK
+            </button>
+          </div>
+          <div class="pattern-slots" id="pattern-slots"></div>
+        </div>
+
+        <!-- Input -->
+        <div class="field-group">
+          <label class="field-label">YOUR INPUT</label>
+          <div class="attempt-slots" id="attempt-slots"></div>
+        </div>
+
+        <!-- Steps -->
+        <div class="field-group">
+          <label class="field-label">PROGRESS</label>
+          <div class="ap-steps" id="ap-steps"></div>
+        </div>
+
+        <!-- Fail counter -->
+        <div class="fail-tracker" id="fail-tracker">
+          <span class="fail-label">FAILED ATTEMPTS:</span>
+          <div class="fail-dots" id="fail-dots"></div>
+          <span class="fail-count" id="fail-count">0 / 5</span>
+        </div>
+
+        <!-- Message -->
+        <div id="auth-msg" class="status-msg"></div>
+
+        <!-- Unlock overlay -->
+        <div id="unlock-overlay" class="unlock-overlay hidden">
+          <div class="unlock-badge">
+            <svg width="64" height="64" viewBox="0 0 90 90" fill="none">
+              <circle cx="45" cy="45" r="40" fill="url(#ugrd)" opacity="0.12"/>
+              <polygon points="45,3 82,24 82,66 45,87 8,66 8,24" fill="none" stroke="#7B61FF" stroke-width="1.5" class="unlock-hex"/>
+              <text x="45" y="56" text-anchor="middle" font-size="32">🔓</text>
+              <defs><radialGradient id="ugrd" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7B61FF"/><stop offset="100%" stop-color="#7B61FF" stop-opacity="0"/></radialGradient></defs>
+            </svg>
+          </div>
+          <div class="unlock-title">ACCESS GRANTED</div>
+          <div class="unlock-user" id="unlock-user-name"></div>
+          <div class="unlock-sub">Gesture biometrics verified</div>
+          <button class="ghost-btn" id="btn-lock-again">LOCK AGAIN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo hint -->
+    <div class="demo-hint" id="demo-hint">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      No camera? Use keyboard: <kbd>O</kbd>=Open <kbd>F</kbd>=Fist <kbd>P</kbd>=Peace <kbd>T</kbd>=Thumbs <kbd>I</kbd>=Point <kbd>K</kbd>=OK <kbd>R</kbd>=Rock <kbd>C</kbd>=Call
+    </div>
+  </section>
+
+  <!-- ══ ENROLL TAB ══ -->
+  <section id="tab-enroll" class="tab-panel">
+    <div class="two-col">
+      <div class="cam-col">
+        <div class="cam-frame" id="enroll-cam-frame">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <video id="enroll-video" playsinline autoplay muted></video>
+          <canvas id="enroll-canvas"></canvas>
+          <div class="cam-overlay" id="enroll-overlay">
+            <div class="cam-icon-wrap"><svg width="40" height="40" viewBox="0 0 90 90" fill="none"><path d="M45 62 L45 48 M45 48 L38 34 M45 48 L52 34 M45 48 L45 30" stroke="#7B61FF" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/><circle cx="38" cy="31" r="3" fill="#7B61FF" opacity="0.5"/><circle cx="52" cy="31" r="3" fill="#7B61FF" opacity="0.5"/><circle cx="45" cy="27" r="3" fill="#7B61FF" opacity="0.5"/></svg></div>
+            <div class="cam-overlay-text">ENROLL CAMERA</div>
+          </div>
+        </div>
+        <div class="gesture-bar" style="margin-top:10px">
+          <span class="gb-label">LIVE DETECTION:</span>
+          <span id="enroll-gest-icon" style="font-size:1.3rem">—</span>
+          <span id="enroll-gest-name" class="gb-name" style="margin-left:6px">—</span>
+        </div>
+        <div class="cam-controls" style="margin-top:8px">
+          <button class="primary-btn" id="btn-enroll-cam">START CAMERA</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-group">
+          <label class="field-label">USER PROFILE</label>
+          <div class="inline-fields">
+            <input type="text" id="enroll-name" class="text-field" placeholder="Display name" maxlength="20"/>
+            <div class="avatar-picker" id="avatar-picker">
+              <span class="av-option selected" data-av="🧑">🧑</span>
+              <span class="av-option" data-av="👤">👤</span>
+              <span class="av-option" data-av="🤖">🤖</span>
+              <span class="av-option" data-av="👾">👾</span>
+              <span class="av-option" data-av="🦊">🦊</span>
+              <span class="av-option" data-av="🐱">🐱</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label class="field-label">GESTURE PALETTE</label>
+            <span class="field-hint">Click to add · Max 5</span>
+          </div>
+          <div class="gesture-grid" id="gesture-palette">
+            <div class="gesture-card" data-g="open_hand"><div class="gc-icon">🖐</div><div class="gc-name">Open</div></div>
+            <div class="gesture-card" data-g="fist"><div class="gc-icon">✊</div><div class="gc-name">Fist</div></div>
+            <div class="gesture-card" data-g="peace"><div class="gc-icon">✌️</div><div class="gc-name">Peace</div></div>
+            <div class="gesture-card" data-g="thumbs_up"><div class="gc-icon">👍</div><div class="gc-name">Thumbs</div></div>
+            <div class="gesture-card" data-g="point_up"><div class="gc-icon">☝️</div><div class="gc-name">Point</div></div>
+            <div class="gesture-card" data-g="ok"><div class="gc-icon">👌</div><div class="gc-name">OK</div></div>
+            <div class="gesture-card" data-g="rock"><div class="gc-icon">🤘</div><div class="gc-name">Rock</div></div>
+            <div class="gesture-card" data-g="call"><div class="gc-icon">🤙</div><div class="gc-name">Call</div></div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">PATTERN BUILDER</label>
+          <div class="pattern-builder" id="pattern-builder">
+            <div class="pb-empty">Click gestures above to build your secret pattern</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">PATTERN STRENGTH</label>
+          <div class="strength-bar-wrap">
+            <div class="strength-bar"><div id="strength-fill"></div></div>
+            <span id="strength-label" class="strength-label">—</span>
+          </div>
+        </div>
+
+        <div id="enroll-msg" class="status-msg" style="margin-bottom:10px"></div>
+        <div class="action-row">
+          <button class="ghost-btn" id="btn-clear-enroll">CLEAR</button>
+          <button class="primary-btn" id="btn-save-enroll">SAVE USER</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ USERS TAB ══ -->
+  <section id="tab-users" class="tab-panel">
+    <div class="users-header">
+      <div>
+        <div class="page-title">Registered Users</div>
+        <div class="page-sub">Manage enrolled gesture profiles</div>
+      </div>
+      <div class="users-stats">
+        <div class="mini-stat"><div id="stat-users">0</div><div>USERS</div></div>
+        <div class="mini-stat success"><div id="stat-total-logins">0</div><div>LOGINS</div></div>
+        <div class="mini-stat danger"><div id="stat-total-fails">0</div><div>FAILED</div></div>
+      </div>
+    </div>
+    <div class="user-cards" id="user-cards">
+      <div class="no-users-msg">No users enrolled yet — go to Enroll tab to add a user</div>
+    </div>
+  </section>
+
+  <!-- ══ AUDIT TAB ══ -->
+  <section id="tab-log" class="tab-panel">
+    <div class="log-topbar">
+      <div>
+        <div class="page-title">Audit Log</div>
+        <div class="page-sub">Tamper-evident authentication record</div>
+      </div>
+      <div class="log-stats-row">
+        <div class="mini-stat"><div id="log-stat-total">0</div><div>TOTAL</div></div>
+        <div class="mini-stat success"><div id="log-stat-ok">0</div><div>GRANTED</div></div>
+        <div class="mini-stat danger"><div id="log-stat-fail">0</div><div>DENIED</div></div>
+        <div class="mini-stat warn"><div id="log-stat-lock">0</div><div>LOCKOUTS</div></div>
+      </div>
+      <div class="log-actions">
+        <button class="ghost-btn sm" id="btn-export-log">EXPORT CSV</button>
+        <button class="ghost-btn sm danger-btn" id="btn-clear-log">CLEAR</button>
+      </div>
+    </div>
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead><tr>
+          <th>#</th><th>TIME</th><th>USER</th><th>EVENT</th><th>SEQUENCE</th><th>RESULT</th><th>SESSION</th>
+        </tr></thead>
+        <tbody id="log-body">
+          <tr class="log-empty"><td colspan="7">No entries yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ SETTINGS TAB ══ -->
+  <section id="tab-settings" class="tab-panel">
+    <div class="settings-grid">
+
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Detection Sensitivity
+        </div>
+        <div class="setting-row">
+          <label>Hold Duration</label>
+          <div class="slider-wrap">
+            <input type="range" id="hold-dur-slider" min="500" max="3000" step="100" value="1500" class="slider"/>
+            <span id="hold-dur-val" class="slider-val">1.5s</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Detection Confidence</label>
+          <div class="slider-wrap">
+            <input type="range" id="conf-slider" min="50" max="95" step="5" value="70" class="slider"/>
+            <span id="conf-val" class="slider-val">70%</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Tracking Smoothing</label>
+          <div class="slider-wrap">
+            <input type="range" id="smooth-slider" min="0" max="5" step="1" value="2" class="slider"/>
+            <span id="smooth-val" class="slider-val">Medium</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Security Policy
+        </div>
+        <div class="setting-row">
+          <label>Max Failed Attempts</label>
+          <div class="slider-wrap">
+            <input type="range" id="max-fail-slider" min="2" max="10" step="1" value="5" class="slider"/>
+            <span id="max-fail-val" class="slider-val">5</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Lockout Duration</label>
+          <div class="slider-wrap">
+            <input type="range" id="lockout-dur-slider" min="10" max="120" step="5" value="30" class="slider"/>
+            <span id="lockout-dur-val" class="slider-val">30s</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Min Pattern Length</label>
+          <div class="slider-wrap">
+            <input type="range" id="min-pat-slider" min="2" max="5" step="1" value="3" class="slider"/>
+            <span id="min-pat-val" class="slider-val">3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Appearance
+        </div>
+        <div class="setting-row">
+          <label>Theme</label>
+          <div class="toggle-group">
+            <button class="toggle-opt active" id="tog-dark">DARK</button>
+            <button class="toggle-opt" id="tog-light">LIGHT</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Scanlines Overlay</label>
+          <div class="toggle-switch-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" id="tog-scanlines" checked/>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Particle Background</label>
+          <div class="toggle-switch-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" id="tog-particles" checked/>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Landmark Color</label>
+          <div class="color-picker-row">
+            <input type="color" id="lm-color" value="#7B61FF" class="color-dot"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          System Info
+        </div>
+        <div class="sysinfo-row"><span>Version</span><span class="si-val">PalmID v2.0.0</span></div>
+        <div class="sysinfo-row"><span>Engine</span><span class="si-val">MediaPipe Hands</span></div>
+        <div class="sysinfo-row"><span>Model</span><span class="si-val">Lite (21 landmarks)</span></div>
+        <div class="sysinfo-row"><span>Session ID</span><span class="si-val" id="si-session">—</span></div>
+        <div class="sysinfo-row"><span>Camera</span><span class="si-val" id="si-camera">Not started</span></div>
+        <div class="sysinfo-row"><span>Users enrolled</span><span class="si-val" id="si-users">0</span></div>
+        <button class="ghost-btn sm danger-btn" id="btn-reset-all" style="margin-top:12px;width:100%">FACTORY RESET</button>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /main-app -->
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="static/js/gesture.js"></script>
+<script src="static/js/app.js"></script>
+</body>
+</html>
