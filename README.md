@@ -69,5 +69,14 @@ The application will be available at: **[http://localhost:8000](http://localhost
 ## Configuration
 System settings like detection confidence and lockout timers can be adjusted directly in the **SETTINGS** tab and are persisted in the database.
 
+## Future Enhancements
+
+- **Multi-Factor Authentication (MFA)**: Integrate gesture patterns with secondary PIN or Email OTP for enhanced security.
+- **Machine Learning Personalization**: Implement custom model training to adapt detection to a user's unique hand proportions and movement speed.
+- **Mobile Companion App**: Develop a mobile interface for remote authentication and secure session management via smartphone.
+- **Hardware Security Key Support**: Integrate WebAuthn to combine biometric gestures with physical FIDO2 security keys.
+- **Advanced Pattern Encryption**: Implement salt-based hashing (e.g., Argon2) for storing gesture sequences to prevent database leaks.
+- **Administrative Analytics**: Enhanced dashboard with authentication heatmaps, failure trend analysis, and automated threat detection.
+
 ## License
 MIT License
