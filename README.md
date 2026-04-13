@@ -87,4 +87,4 @@ System settings like detection confidence and lockout timers can be adjusted dir
 - **Administrative Analytics**: Enhanced dashboard with authentication heatmaps, failure trend analysis, and automated threat detection.
 
 ## License
-MIT License
+MIT License 

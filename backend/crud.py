@@ -70,3 +70,4 @@ def reset_all(db: Session):
     db.delete(settings)
     db.commit()
     return True
+ 

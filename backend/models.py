@@ -37,3 +37,4 @@ class Settings(Base):
     detection_conf = Column(Integer, default=70) # x 100
     smoothing = Column(Integer, default=2)
     landmark_color = Column(String, default="#7B61FF")
+ 
