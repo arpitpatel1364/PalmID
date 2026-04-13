@@ -2,6 +2,14 @@
 
 PalmID is a state-of-the-art gesture-based biometric authentication system. It uses **MediaPipe Hands** for real-time skeletal landmark tracking and a **FastAPI/SQLite** backend to provide secure, persistent enrollment and authentication.
 
+## Project Preview
+
+| Dashboard & Interaction | Authentication & Enrollment |
+| :---: | :---: |
+| ![Dashboard](Proof/Screenshot%201.png) | ![Authentication](Proof/Screenshot%202.png) |
+| ![Settings](Proof/Screenshot%203.png) | ![Enrollment](Proof/Screenshot%204.png) |
+| ![Audit Logs](Proof/Screenshot%205.png) | |
+
 ## Key Features
 
 - **Biometric Enrollment**: Users can register unique gesture sequences (patterns) as their "password".
